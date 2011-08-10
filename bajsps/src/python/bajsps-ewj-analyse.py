@@ -18,12 +18,16 @@ from nltk.collocations import TrigramCollocationFinder
 from nltk.metrics import BigramAssocMeasures
 from nltk.metrics import TrigramAssocMeasures
 from nltk.corpus import stopwords
+from nltk.corpus import words
 import nltk.util
 print("NLTK import end")
 import logging
-from gensim import corpora, models, similarities
+# from gensim import corpora, models, similarities
 
 # gensimoutdir = "/XXXprojects/cch/foresight/dat/gensim"
+
+print(type(words))
+sys.exit()
 
 stopwords = nltk.corpus.stopwords.words('english')
 
@@ -280,29 +284,34 @@ if __name__ == '__main__':
     artidlist = getArtidList(indir)
     
     # print("Read frequency lists - all tokens.")
-    # getFrequencyListsAllTokensFromFile(indir)
+    getFrequencyListsAllTokensFromFile(indir)
     
     # print("Read frequency lists - tokens per pub.")
-    # getFrequencyListsPerPubTokensFromFile(indir, artidlist)
+    getFrequencyListsPerPubTokensFromFile(indir, artidlist)
  
     # all tokens unsorted
-    print("Read unsorted lists.")
-    indir = os.path.join(basetokdir, "unsort", listtype)
+    # print("Read unsorted lists.")
+    # indir = os.path.join(basetokdir, "unsort", listtype)
     # print("Read unsorted lists - all tokens.")
     # getLowListsAllTokensFromFile(indir)
     
-    print("Read unsorted lists - tokens by pub.")
-    getLowListsPerPubTokensFromFile(indir, artidlist)
+    # print("Read unsorted lists - tokens by pub.")
+    # getLowListsPerPubTokensFromFile(indir, artidlist)
+    # print(len(unsorttokperpublist))
 
- 
-    # print(freqtoklistdic["all"][:20])
-    # print(freqfrqlistdic["all"][:20])
-    # print(freqtoklistdic["EWJ-1858-04-01-Ar05901"][:10])
-    # print(freqfrqlistdic["EWJ-1858-04-01-Ar05901"][:10])
+    print(freqtoklistdic["all"][:20])
+    print(freqfrqlistdic["all"][:20])
+    print(freqtoklistdic["EWJ-1858-04-01-Ar05901"][:10])
+    print(freqfrqlistdic["EWJ-1858-04-01-Ar05901"][:10])
     # print(unsorttoklistdic["all"][:10])
     # print(unsorttoklistdic["EWJ-1858-04-01-Ar05901"][:10])
     # sys.exit()
 
+    for n, f in enumerate(freqfrqlistdic["all"]):
+        if int(f) > 100:
+            print(f, freqtoklistdic["all"][n])
+
+    print(type(freqfrqlistdic["all"]))
     # pickleinput = open(picklefilepath, 'rb')
     # tokendic     = cPickle.load(pickleinput)
     # frequencydic = cPickle.load(pickleinput)
@@ -314,8 +323,8 @@ if __name__ == '__main__':
     # distplotlist = ["women", "men", "governess", "institution", "education", "teacher", "crimea", "nightingale", "blackwell", "christmas"]
     # printDistributionPlot(unsorttoklistdic["all"], distplotlist)   
 
-    print("processGensim")
-    processGensim(unsorttokperpublist)
+    # print("processGensim")
+    # processGensim(unsorttokperpublist)
 
     print("--== FINISHED ==--")
 
