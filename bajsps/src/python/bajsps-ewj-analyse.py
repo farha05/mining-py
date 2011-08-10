@@ -13,10 +13,10 @@ import cPickle
 from optparse import OptionParser
 print("NLTK import start")
 # import nltk
-from nltk.collocations import BigramCollocationFinder
-from nltk.collocations import TrigramCollocationFinder
-from nltk.metrics import BigramAssocMeasures
-from nltk.metrics import TrigramAssocMeasures
+# from nltk.collocations import BigramCollocationFinder
+# from nltk.collocations import TrigramCollocationFinder
+# from nltk.metrics import BigramAssocMeasures
+# from nltk.metrics import TrigramAssocMeasures
 from nltk.corpus import stopwords
 from nltk.corpus import words
 from nltk.corpus import wordnet
@@ -32,7 +32,16 @@ for fid in words.fileids():
     print(fid, len(words.words(fid)))
     print(words.words(fid)[:5], "...", words.words(fid)[-5:])
 
-print(wordnet.all_lemma_names())
+# for k in wordnet.all_lemma_names():
+#     print(k)
+all_lemma_list = [k for k in wordnet.all_lemma_names()]
+print(len(all_lemma_list))
+
+# for k in wordnet.all_synsets():
+#     print(k)
+# all_synsets_list = [k for k in wordnet.all_synsets()]
+# print(len(all_synsets_list))
+
 
 sys.exit()
 
