@@ -19,6 +19,7 @@ from nltk.metrics import BigramAssocMeasures
 from nltk.metrics import TrigramAssocMeasures
 from nltk.corpus import stopwords
 from nltk.corpus import words
+from nltk.corpus import wordnet
 import nltk.util
 print("NLTK import end")
 import logging
@@ -26,7 +27,13 @@ import logging
 
 # gensimoutdir = "/XXXprojects/cch/foresight/dat/gensim"
 
-print(type(words))
+print(words.fileids())
+for fid in words.fileids():
+    print(fid, len(words.words(fid)))
+    print(words.words(fid)[:5], "...", words.words(fid)[-5:])
+
+print(wordnet.all_lemma_names())
+
 sys.exit()
 
 stopwords = nltk.corpus.stopwords.words('english')
