@@ -18,11 +18,12 @@ import sqlite3
 from optparse import OptionParser
 print("NLTK import start")
 # import nltk
-from nltk.collocations import BigramCollocationFinder
-from nltk.collocations import TrigramCollocationFinder
-from nltk.metrics import BigramAssocMeasures
-from nltk.metrics import TrigramAssocMeasures
+# from nltk.collocations import BigramCollocationFinder
+# from nltk.collocations import TrigramCollocationFinder
+# from nltk.metrics import BigramAssocMeasures
+# from nltk.metrics import TrigramAssocMeasures
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet
 import nltk.util
 print("NLTK import end")
 
@@ -30,6 +31,9 @@ print("NLTK import end")
 sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 
 english_stops = set(stopwords.words('english'))
+
+wn_all_lemma_list = [k for k in wordnet.all_lemma_names()]
+wn_all_lemma_set = set(wn_all_lemma_list)
 
 ipunct = string.punctuation
 letset = set(string.letters + string.digits)
@@ -51,10 +55,14 @@ def processTexts(ilist):
     artidlist = []
     tokendic = {
                 "low" : { },
-                "stw" : { }
+                "stw" : { },
+                "wlo" : { },
+                "wst" : { }
                 }
     tokendic["low"]["all"] = []
     tokendic["stw"]["all"] = []
+    tokendic["wlo"]["all"] = []
+    tokendic["wst"]["all"] = []
     for ipath in ilist:
         pa, fi = os.path.split(ipath)
         artid, ext = os.path.splitext(fi)
@@ -81,14 +89,30 @@ def processTexts(ilist):
         # print(len(tokennopunctlist), tokennopunctlist)
         # tokenlowerlist = [t.lower() for t in tokennopunctlist]
         # print(len(tokenlowerlist), tokenlowerlist)
+        tokengoodocrlist = filterBadOcrUsingWordnetLemmata(tokenlist)
+        tokengoodocrstwlist = filterBadOcrUsingWordnetLemmata(tokenstwlist)
         tokendic["low"][artid] = tokenlist
         tokendic["stw"][artid] = tokenstwlist
+        tokendic["wlo"][artid] = tokengoodocrlist
+        tokendic["wst"][artid] = tokengoodocrstwlist
         tokendic["low"]["all"] += tokenlist
         tokendic["stw"]["all"] += tokenstwlist
+        tokendic["wlo"]["all"] += tokengoodocrlist
+        tokendic["wst"]["all"] += tokengoodocrstwlist
     # print(tokendic)
     # print(tokendic["stw"]["all"])
     return tokendic, artidlist
 
+def filterBadOcrUsingWordnetLemmata(tlist):
+    # far too slow to check against whole WN word list
+    # we first use sets and intersection and compare the smaller lists
+    # wlist = [t for t in tlist if t in wn_all_lemma_list]
+    tset = set(tlist)
+    iset = tset.intersection(wn_all_lemma_set)
+    ilist = list(iset)
+    wlist = [t for t in tlist if t in ilist]
+    # print(len(tlist), len(wlist), len(ilist))
+    return wlist
 
 def postProcessTokens(tlist):
     # strip punctuation
@@ -247,7 +271,53 @@ def printDistributionPlot(tokunsortedlist, fdist):
     #
     # dispersion plot
     nltk.draw.dispersion.dispersion_plot(tokunsortedlist, distplotlist)
-    
+
+def createPickle(picklefilepath, tokendic, frequencydic):
+    pickleoutput = open(picklefilepath, 'wb')
+    print("Pickle tokendic")
+    cPickle.dump(tokendic, pickleoutput, 2)
+    print("Pickle frequencydic")
+    cPickle.dump(frequencydic, pickleoutput, 2)
+    pickleoutput.close()
+
+def createSqlite(basedir):    
+    sqlite3dir = os.path.join(basedir, "db")
+    sqlite3filepath = os.path.join(sqlite3dir, "bajsps-ewj.db")
+    scon = sqlite3.connect(sqlite3filepath)
+    scur = scon.cursor()
+    scur.executescript("""
+        create table tokenslow(
+            id integer primary key,
+            seqid integer,
+            artid text,
+            token text
+        );
+
+        create table tokensstw(
+            id integer primary key,
+            seqid integer,
+            artid text,
+            token text
+        );
+
+        create table typeslow(
+            id integer primary key,
+            seqid integer,
+            artid text,
+            token text,
+            freq integer
+        );
+
+        create table typesstw(
+            id integer primary key,
+            seqid integer,
+            artid text,
+            token text,
+            freq integer
+        );
+        """)
+    scon.commit()
+    scon.close()
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -265,7 +335,9 @@ if __name__ == '__main__':
 
     basedir = options.basedir
     processtype = options.processtype
-    
+
+    # for testing    
+    # ewjsubdir = "corpustxt-20090224/EWJ/1858/03"
     ewjsubdir = "corpustxt-20090224/EWJ"
     ewjpath = os.path.join(basedir, ewjsubdir)
     
@@ -321,51 +393,10 @@ if __name__ == '__main__':
             for tup in frequencydic[listtype][listid]:
                 print("%s\t%s" % (tup[0], tup[1]), file = fobj)
             fobj.close()
+            
+    # createPickle(picklefilepath, tokendic, frequencydic)
+    # createSqlite(basedir)
 
-    # pickleoutput = open(picklefilepath, 'wb')
-    # print("Pickle tokendic")
-    # cPickle.dump(tokendic, pickleoutput, 2)
-    # print("Pickle frequencydic")
-    # cPickle.dump(frequencydic, pickleoutput, 2)
-    # pickleoutput.close()
-
-    sqlite3dir = os.path.join(basedir, "db")
-    sqlite3filepath = os.path.join(sqlite3dir, "bajsps-ewj.db")
-    scon = sqlite3.connect(sqlite3filepath)
-    scur = scon.cursor()
-    scur.executescript("""
-        create table tokenslow(
-            id integer primary key,
-            seqid integer,
-            artid text,
-            token text
-        );
-
-        create table tokensstw(
-            id integer primary key,
-            seqid integer,
-            artid text,
-            token text
-        );
-
-        create table typeslow(
-            id integer primary key,
-            seqid integer,
-            artid text,
-            token text,
-            freq integer
-        );
-
-        create table typesstw(
-            id integer primary key,
-            seqid integer,
-            artid text,
-            token text,
-            freq integer
-        );
-        """)
-    scon.commit()
-    scon.close()
 
 
     print("--== FINISHED ==--")
