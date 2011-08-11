@@ -229,42 +229,79 @@ def getLowListsPerPubTokensFromFile(indir, artidlist):
     # print(len(unsorttokperpublist))
     # sys.exit()
 
-def filterTokensUsingWordnet():
-    # for k in wordnet.all_lemma_names():
-    #     print(k)
+def getWordsAndWordnetStats():
     all_lemma_list = [k for k in wordnet.all_lemma_names()]
-    print("WordNet tokens:", len(all_lemma_list))
+    print(len(all_lemma_list))
+    print("WordNet lemmata:", len(all_lemma_list))
 
     # just a first test to see what proportion of tokens is in wordnet
-    # this is far too slow - try using sets
     noofewjtokens = len(freqtoklistdic["all"])     
-    inwordnet = 0
-    print(noofewjtokens)
-    for n, f in enumerate(freqfrqlistdic["all"]):
-        # if int(f) == 1:
-        #     print(f, freqtoklistdic["all"][n])
-        if freqtoklistdic["all"][n] in all_lemma_list:
-            # print(freqtoklistdic["all"][n])
-            inwordnet += 1
-    print(inwordnet)
+    # inwordnet = 0
+    # print(noofewjtokens)
 
-    print("%d of %d EWJ tokens are in wordnet" % (inwordnet, noofewjtokens))
-    print("i. e. %d percent" % (inwordwnet*100/noofewjtokens, ))
+    # this is far too slow - using sets is a lot faster
+    # for n, f in enumerate(freqfrqlistdic["all"]):
+    #     # if int(f) == 1:
+    #     #     print(f, freqtoklistdic["all"][n])
+    #     if freqtoklistdic["all"][n] in all_lemma_list:
+    #         # print(freqtoklistdic["all"][n])
+    #         inwordnet += 1
     
+    tokset = set(freqtoklistdic["all"])
+    wntset = set(all_lemma_list)
+    iset = tokset.intersection(wntset)
+    inwordnet = len(iset)
     
-    
+    # print(inwordnet)
+
+    print("%d of %d EWJ tokens are in Wordnet" % (inwordnet, noofewjtokens))
+    print("i. e. %d percent" % (inwordnet*100/noofewjtokens, ))
     
     # for k in wordnet.all_synsets():
     #     print(k)
     # all_synsets_list = [k for k in wordnet.all_synsets()]
     # print(len(all_synsets_list))
 
+    tokset = set(freqtoklistdic["all"])
+    wrdset = set(words.words("en"))
+    iset = tokset.intersection(wrdset)
+    inwordnet = len(iset)
+    
+    print("%d of %d EWJ tokens are in NLTK words" % (inwordnet, noofewjtokens))
+    print("i. e. %d percent" % (inwordnet*100/noofewjtokens, ))
+    
+    percentlist = []
+    for artid in artidlist:
+        # print(artid)
+        noofewjtokens = len(freqtoklistdic[artid])     
+        tokset = set(freqtoklistdic[artid])
+        iset = tokset.intersection(wntset)
+        inwordnet = len(iset)
+        # print("%s: %d of %d EWJ tokens are in Wordnet" % (artid, inwordnet, noofewjtokens))
+        percentlist.append(inwordnet*100/noofewjtokens)
+    print(max(percentlist), min(percentlist))
+    print("Max percentage of EWJ tokens in Wordnet: %d %%" % (max(percentlist), ))
+    print("Min percentage of EWJ tokens in Wordnet: %d %%" % (min(percentlist), ))
+
+
+
+def filterTokensUsingWordnet():
+    # for k in wordnet.all_lemma_names():
+    #     print(k)
+    all_lemma_list = [k for k in wordnet.all_lemma_names()]
+    
+    tokset = set(freqtoklistdic["all"])
+    wntset = set(all_lemma_list)
+    iset = tokset.intersection(wntset)
+    inwordnet = len(iset)
+
 
 def filterTokensUsingWords():
-    print(words.fileids())
-    for fid in words.fileids():
-        print("Words in '%s': %d" % (fid, len(words.words(fid))))
-        print(words.words(fid)[:5], "...", words.words(fid)[-5:])
+    # print(words.fileids())
+    # for fid in words.fileids():
+    #     print("Words in '%s': %d" % (fid, len(words.words(fid))))
+    #     print(words.words(fid)[:5], "...", words.words(fid)[-5:])
+    pass
 
  
 
@@ -348,9 +385,11 @@ if __name__ == '__main__':
 
     # print("processGensim")
     # processGensim(unsorttokperpublist)
+
+    # getWordsAndWordnetStats()
     
     filterTokensUsingWordnet()
-    filterTokensUsingWords()
+    # filterTokensUsingWords()
 
     print("--== FINISHED ==--")
 
