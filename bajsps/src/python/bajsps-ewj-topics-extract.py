@@ -283,7 +283,20 @@ def getWordsAndWordnetStats():
     print("Max percentage of EWJ tokens in Wordnet: %d %%" % (max(percentlist), ))
     print("Min percentage of EWJ tokens in Wordnet: %d %%" % (min(percentlist), ))
 
+    # Cross check numbers of unique tokens
+    # for n, f in enumerate(freqfrqlistdic["all"]):
+    #     # if int(f) == 1:
+    #     #     print(f, freqtoklistdic["all"][n])
+    haplegalllist = [ freqtoklistdic["all"][n] for n, f in enumerate(freqfrqlistdic["all"]) if int(f) == 1 ]
+    haplegalllen = len(haplegalllist)
+    haplegartsum = 0
+    for artid in artidlist:
+        haplegartlist = [ freqtoklistdic[artid][n] for n, f in enumerate(freqfrqlistdic[artid]) if int(f) == 1 ]
+        haplegartlen = len(haplegartlist)
+        haplegartsum += haplegartlen
 
+    print("Hapax legomena - all:             %d" % (haplegalllen, ))
+    print("Hapax legomena - sum of articles: %d" % (haplegartsum, ))
 
 def filterTokensUsingWordnet():
     # for k in wordnet.all_lemma_names():
