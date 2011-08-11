@@ -317,6 +317,29 @@ def filterTokensUsingWords():
     pass
 
  
+def extractTargetTermsCastanet1():
+    """Hearst, p. 2, 3.1: Select Representative Words:
+    The criteria for choosing the target words is information gain (Mitchell, 1997).
+    Define the set W to be all the unique words in the the document set D. Let the distribution
+    of a word w be the number of documents in D that the word occurs in. Initially, the words
+    in W are ordered according to their distribution in the entire collection D. At each iteration,
+    the highest-scoring word w is added to an initially-empty set S and removed from W, and the
+    documents covered by w are removed from D. The process repeats until no more documents are
+    left in D."""
+    print("HIER")
+    W = freqtoklistdic["all"]
+    D = artidlist
+    for w in W:
+        wdistribution = 0
+        for artid in D:
+            if w in freqtoklistdic[artid]:
+                wdistribution += 1
+        print(w, wdistribution)
+ 
+def extractTargetTermsCastanet2():
+    alltoklist = freqtoklistdic["all"]
+
+ 
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -327,11 +350,11 @@ if __name__ == '__main__':
     # parser.add_option("-r", "--readwrite", dest="readwrite", default="read",
     #                   help="Read: read in previously generated tables, write: write all tables from scratch - default: 'read'", metavar="RW")
     parser.add_option("-t", "--listtype", dest="listtype",
-                      type="choice", choices=["low", "stw"], default="stw",
+                      type="choice", choices=["low", "stw", "wlo", "wst"], default="wst",
                       help="What kind of list type to run: low = all tokens lower case, stw = tokens no stop words - default: %default", metavar="PROCESS")
-    parser.add_option("-p", "--process", dest="processtype",
-                      type="choice", choices=["disp", "ngram"], default="disp",
-                      help="What kind of process to run: disp, ngram - default: %default", metavar="PROCESS")
+    parser.add_option("-m", "--method", dest="targtermmethod",
+                      type="choice", choices=["castanet1", "castanet2"], default="castanet1",
+                      help="What kind of method to use to extract target terms: castanet1 (Stoica/Hearst), castanet2 (Hearst) - default: %default", metavar="METHOD")
     # parser.add_option("-x", "--fileprefix", dest="fileprefix", default="xxx",
     #                   help="Prefix for all created filenames - default: 'xxx'", metavar="PFIX")
 
@@ -339,19 +362,19 @@ if __name__ == '__main__':
 
     basedir = options.basedir
     gensimoutdir = options.gensimoutdir
-    processtype = options.processtype
+    targtermmethod = options.targtermmethod
     listtype = options.listtype
     
-    if processtype == "disp":
-        srcsubdir = "freqsort"
-    elif processtype == "ngram":
-        srcsubdir = "unsort"
+    # if processtype == "disp":
+    #     srcsubdir = "freqsort"
+    # elif processtype == "ngram":
+    #     srcsubdir = "unsort"
 
+    srcsubdir = "freqsort"
+        
     basetokdir = os.path.join(basedir, "tok")
     indir = os.path.join(basetokdir, srcsubdir,  listtype)
 
-    pickledir = os.path.join(basedir, "pcl")
-    picklefilepath = os.path.join(pickledir, "bajsps-ewj.pcl")
 
     print("Read article ids - artidlist")
     artidlist = getArtidList(indir)
@@ -362,47 +385,25 @@ if __name__ == '__main__':
     # print("Read frequency lists - tokens per pub.")
     getFrequencyListsPerPubTokensFromFile(indir, artidlist)
  
-    # all tokens unsorted
-    # print("Read unsorted lists.")
-    # indir = os.path.join(basetokdir, "unsort", listtype)
-    # print("Read unsorted lists - all tokens.")
-    # getLowListsAllTokensFromFile(indir)
-    
-    # print("Read unsorted lists - tokens by pub.")
-    # getLowListsPerPubTokensFromFile(indir, artidlist)
-    # print(len(unsorttokperpublist))
-
     # print(freqtoklistdic["all"][:20])
     # print(freqfrqlistdic["all"][:20])
     # print(freqtoklistdic["EWJ-1858-04-01-Ar05901"][:10])
     # print(freqfrqlistdic["EWJ-1858-04-01-Ar05901"][:10])
-    # print(unsorttoklistdic["all"][:10])
-    # print(unsorttoklistdic["EWJ-1858-04-01-Ar05901"][:10])
-    # sys.exit()
-
-    # for n, f in enumerate(freqfrqlistdic["all"]):
-    #     if int(f) > 100:
-    #         print(f, freqtoklistdic["all"][n])
-
-    # print(type(freqfrqlistdic["all"]))
-    # pickleinput = open(picklefilepath, 'rb')
-    # tokendic     = cPickle.load(pickleinput)
-    # frequencydic = cPickle.load(pickleinput)
-    # pickleinput.close()
-    # print(tokendic["stw"]["EWJ-1858-04-01-Ar05901"][:10])
-    # print(frequencydic["stw"]["EWJ-1858-04-01-Ar05901"][:10])
-
-    # print("distribution plot")
-    # distplotlist = ["women", "men", "governess", "institution", "education", "teacher", "crimea", "nightingale", "blackwell", "christmas"]
-    # printDistributionPlot(unsorttoklistdic["all"], distplotlist)   
 
     # print("processGensim")
     # processGensim(unsorttokperpublist)
 
     # getWordsAndWordnetStats()
     
-    filterTokensUsingWordnet()
+    # actual filtering is now done in bajsps-ewj-tokenize.py
+    # filterTokensUsingWordnet()
     # filterTokensUsingWords()
+    
+    if targtermmethod == "castanet1":
+        extractTargetTermsCastanet1()
+    elif targtermmethod == "castanet2":
+        extractTargetTermsCastanet1()
+    
 
     print("--== FINISHED ==--")
 
