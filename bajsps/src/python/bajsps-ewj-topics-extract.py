@@ -326,7 +326,6 @@ def extractTargetTermsCastanet1():
     the highest-scoring word w is added to an initially-empty set S and removed from W, and the
     documents covered by w are removed from D. The process repeats until no more documents are
     left in D."""
-    print("HIER")
     W = freqtoklistdic["all"]
     D = artidlist
     for w in W:
