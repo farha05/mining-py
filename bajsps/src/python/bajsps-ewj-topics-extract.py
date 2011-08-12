@@ -229,6 +229,19 @@ def getLowListsPerPubTokensFromFile(indir, artidlist):
     # print(len(unsorttokperpublist))
     # sys.exit()
 
+def createEwjTextCollection():
+    """Convert the unsorted, non-unique, cleaned list of tokens per article into
+    a NLTK TextCollection to allow to apply some nice built-in NLTK methods."""
+    nltktextlist = []
+    nltktextdic = {}
+    for artid in artidlist:
+        nltktext = nltk.Text(unsorttoklistdic[artid])
+        nltktextlist.append(nltktext)
+        nltktextdic[artid] = nltktext
+    ewjcoll = nltk.TextCollection(nltktextlist)
+    return ewjcoll, nltktextdic
+      
+
 def getWordsAndWordnetStats():
     all_lemma_list = [k for k in wordnet.all_lemma_names()]
     print(len(all_lemma_list))
@@ -298,7 +311,7 @@ def getWordsAndWordnetStats():
     print("Hapax legomena - all:             %d" % (haplegalllen, ))
     print("Hapax legomena - sum of articles: %d" % (haplegartsum, ))
 
-def filterTokensUsingWordnet():
+def filterTokensUsingNltkWordnet():
     # for k in wordnet.all_lemma_names():
     #     print(k)
     all_lemma_list = [k for k in wordnet.all_lemma_names()]
@@ -309,7 +322,7 @@ def filterTokensUsingWordnet():
     inwordnet = len(iset)
 
 
-def filterTokensUsingWords():
+def filterTokensUsingNltkWords():
     # print(words.fileids())
     # for fid in words.fileids():
     #     print("Words in '%s': %d" % (fid, len(words.words(fid))))
@@ -340,18 +353,37 @@ def extractTargetTermsCastanet1():
 def extractTargetTermsCastanet2():
     alltoklist = freqtoklistdic["all"]
 
-def extractTargetTermsTfIdf(artdir):
-    # see nltk-051.py
-    alltoklist = freqtoklistdic["all"]
-    artfilepathlist = [ os.path.join(artdir, artid + ".txt") for artid in artidlist ]
-    print(artfilepathlist[:3])
-    # create text collection
-    ewjcollection = nltk.TextCollection(artfilepathlist)
-    print(ewjcollection)
-    text = os.path.join(artdir, "EWJ-1858-03-01-Ar05802.txt")
-    print(ewjcollection.tf_idf("parliament", text))
-    print(ewjcollection.tf_idf("injustice", text))
+def extractTargetTermsTfIdf(ecoll, etextdic):
+    for artid in artidlist:
+        if artid != "EWJ-1864-08-01-Ar04603":
+            continue
+        for utoken in freqtoklistdic[artid]:
+            print(utoken, ecoll.tf_idf(utoken, etextdic[artid]))
 
+    
+def testNltkTextAndTextCollection(ecoll, etextdic):
+    # Testing NLTK Text and TextCollection:
+    # print(ecoll.tf_idf("parliament", etextdic["EWJ-1864-08-01-Ar04603"]))
+    # print(ecoll.tf_idf("injustice", etextdic["EWJ-1864-08-01-Ar04603"]))
+    # print(ecoll.tf_idf("king", etextdic["EWJ-1864-08-01-Ar04603"]))
+    # print(ecoll.concordance("king"))
+    # print(ecoll.concordance("parliament"))
+    # print(etextdic["EWJ-1864-08-01-Ar04603"].collocations())
+    # print(etextdic["EWJ-1858-04-01-Ar00802"].collocations())
+    # print(ecoll.count("parliament"))
+    # print(etextdic["EWJ-1858-12-01-Ar04902"].count("parliament"))
+    # print(ecoll.index("parliament"))
+    # print(etextdic["EWJ-1858-12-01-Ar04902"].index("parliament"))
+    # what is wrong with regex search?
+    # print(ecoll.search("<parliament[a-z]*>"))
+    # print(etextdic["EWJ-1858-12-01-Ar04902"].search("<parliament[a-z]*>"))
+    # print(ecoll.findall("<parliament[a-z]*>"))
+    # print(etextdic["EWJ-1858-12-01-Ar04902"].findall("<parliament[a-z]*>"))
+    # print(ecoll.similar("parliament"))
+    # print(ecoll.common_contexts(["parliament", "king"]))
+    # print(ecoll.dispersion_plot(["parliament", "king"]))
+    # print(ecoll.plot(50))
+    pass
  
 
 if __name__ == '__main__':
@@ -384,10 +416,8 @@ if __name__ == '__main__':
     #     srcsubdir = "unsort"
 
     srcsubdir = "freqsort"
-        
     basetokdir = os.path.join(basedir, "tok")
     indir = os.path.join(basetokdir, srcsubdir,  listtype)
-
 
     print("Read article ids - artidlist")
     artidlist = getArtidList(indir)
@@ -398,6 +428,19 @@ if __name__ == '__main__':
     # print("Read frequency lists - tokens per pub.")
     getFrequencyListsPerPubTokensFromFile(indir, artidlist)
  
+    srcsubdir = "unsort"
+    basetokdir = os.path.join(basedir, "tok")
+    indir = os.path.join(basetokdir, srcsubdir,  listtype)
+
+    print("Read unsorted lists - all tokens.")
+    getLowListsAllTokensFromFile(indir)
+
+    print("Read unsorted lists - tokens by pub.")
+    getLowListsPerPubTokensFromFile(indir, artidlist)
+    
+    print("Create EWJ TextCollection")
+    ewjtextcollection, ewjtextdic = createEwjTextCollection()
+
     # print(freqtoklistdic["all"][:20])
     # print(freqfrqlistdic["all"][:20])
     # print(freqtoklistdic["EWJ-1858-04-01-Ar05901"][:10])
@@ -409,16 +452,17 @@ if __name__ == '__main__':
     # getWordsAndWordnetStats()
     
     # actual filtering is now done in bajsps-ewj-tokenize.py
-    # filterTokensUsingWordnet()
-    # filterTokensUsingWords()
+    # filterTokensUsingNltkWordnet()
+    # filterTokensUsingNltkWords()
     
     if targtermmethod == "castanet1":
         extractTargetTermsCastanet1()
     elif targtermmethod == "castanet2":
         extractTargetTermsCastanet1()
     elif targtermmethod == "tfidf":
-        extractTargetTermsTfIdf(indir)
+        extractTargetTermsTfIdf(ewjtextcollection, ewjtextdic)
     
+    testNltkTextAndTextCollection(ewjtextcollection, ewjtextdic)
 
     print("--== FINISHED ==--")
 
