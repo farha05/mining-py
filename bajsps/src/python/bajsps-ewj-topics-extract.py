@@ -341,6 +341,7 @@ def extractTargetTermsCastanet2():
     alltoklist = freqtoklistdic["all"]
 
 def extractTargetTermsTfIdf(artdir):
+    # see nltk-051.py
     alltoklist = freqtoklistdic["all"]
     artfilepathlist = [ os.path.join(artdir, artid + ".txt") for artid in artidlist ]
     print(artfilepathlist[:3])
