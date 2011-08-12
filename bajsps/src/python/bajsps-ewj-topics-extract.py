@@ -328,6 +328,8 @@ def extractTargetTermsCastanet1():
     left in D."""
     W = freqtoklistdic["all"]
     D = artidlist
+    print(D[:3])
+    sys.exit()
     for w in W:
         wdistribution = 0
         for artid in D:
@@ -337,6 +339,17 @@ def extractTargetTermsCastanet1():
  
 def extractTargetTermsCastanet2():
     alltoklist = freqtoklistdic["all"]
+
+def extractTargetTermsTfIdf(artdir):
+    alltoklist = freqtoklistdic["all"]
+    artfilepathlist = [ os.path.join(artdir, artid + ".txt") for artid in artidlist ]
+    print(artfilepathlist[:3])
+    # create text collection
+    ewjcollection = nltk.TextCollection(artfilepathlist)
+    print(ewjcollection)
+    text = os.path.join(artdir, "EWJ-1858-03-01-Ar05802.txt")
+    print(ewjcollection.tf_idf("parliament", text))
+    print(ewjcollection.tf_idf("injustice", text))
 
  
 
@@ -352,8 +365,8 @@ if __name__ == '__main__':
                       type="choice", choices=["low", "stw", "wlo", "wst"], default="wst",
                       help="What kind of list type to run: low = all tokens lower case, stw = tokens no stop words - default: %default", metavar="PROCESS")
     parser.add_option("-m", "--method", dest="targtermmethod",
-                      type="choice", choices=["castanet1", "castanet2"], default="castanet1",
-                      help="What kind of method to use to extract target terms: castanet1 (Stoica/Hearst), castanet2 (Hearst) - default: %default", metavar="METHOD")
+                      type="choice", choices=["castanet1", "castanet2", "tfidf"], default="castanet1",
+                      help="What kind of method to use to extract target terms: castanet1 (Stoica/Hearst), castanet2 (Hearst), TF/IDF - default: %default", metavar="METHOD")
     # parser.add_option("-x", "--fileprefix", dest="fileprefix", default="xxx",
     #                   help="Prefix for all created filenames - default: 'xxx'", metavar="PFIX")
 
@@ -402,6 +415,8 @@ if __name__ == '__main__':
         extractTargetTermsCastanet1()
     elif targtermmethod == "castanet2":
         extractTargetTermsCastanet1()
+    elif targtermmethod == "tfidf":
+        extractTargetTermsTfIdf(indir)
     
 
     print("--== FINISHED ==--")
