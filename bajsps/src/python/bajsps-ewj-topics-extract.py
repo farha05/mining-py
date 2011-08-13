@@ -365,7 +365,7 @@ def extractTargetTermsCastanet2():
     In Procs. of SIGIR ’99."""
     alltoklist = freqtoklistdic["all"]
 
-def extractTargetTermsTfIdf(ecoll, etextdic, ntt):
+def extractTargetTermsTfIdf(ecoll, etextdic, ntt, tdir, ltype):
     # Result from a test run for top 10 tf-idf tokens from EWJ-1864-08-01-Ar04603
     # slave            0.048324
     # law              0.036512
@@ -393,6 +393,11 @@ def extractTargetTermsTfIdf(ecoll, etextdic, ntt):
         targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)[:ntt]
         # for s in targettermlist:
         #     print("%-15s  %f" % (s[0], s[1]))
+        writeTargetTerms(targettermlist, tdir, ltype)
+
+def writeTargetTerms(ttlist, tdir, ltype):
+    print(tdir, ltype)
+    
     
 def testNltkTextAndTextCollection(ecoll, etextdic):
     # Testing NLTK Text and TextCollection:
@@ -454,6 +459,8 @@ if __name__ == '__main__':
     srcsubdir = "freqsort"
     basetokdir = os.path.join(basedir, "tok")
     indir = os.path.join(basetokdir, srcsubdir,  listtype)
+    basetopicdir = "topics"
+    topicdir = os.path.join(basedir, basetopicdir)
 
     print("Read article ids - artidlist")
     artidlist = getArtidList(indir)
@@ -496,9 +503,9 @@ if __name__ == '__main__':
     elif targtermmethod == "castanet2":
         extractTargetTermsCastanet1()
     elif targtermmethod == "tfidf":
-        extractTargetTermsTfIdf(ewjtextcollection, ewjtextdic, nooftargetterms)
+        extractTargetTermsTfIdf(ewjtextcollection, ewjtextdic, nooftargetterms, topicdir, listtype)
     
-    testNltkTextAndTextCollection(ewjtextcollection, ewjtextdic)
+    # testNltkTextAndTextCollection(ewjtextcollection, ewjtextdic)
 
     print("--== FINISHED ==--")
 
