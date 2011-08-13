@@ -9,7 +9,8 @@ import string
 import re
 import types
 import os, os.path
-import cPickle
+# import cPickle
+from operator import itemgetter, attrgetter
 from optparse import OptionParser
 print("NLTK import start")
 # import nltk
@@ -331,7 +332,8 @@ def filterTokensUsingNltkWords():
 
  
 def extractTargetTermsCastanet1():
-    """Hearst, p. 2, 3.1: Select Representative Words:
+    """Stoica / Hearst: Nearly-Automated Metadata Hierarchy Creation,
+    p. 2, 3.1: Select Representative Words:
     The criteria for choosing the target words is information gain (Mitchell, 1997).
     Define the set W to be all the unique words in the the document set D. Let the distribution
     of a word w be the number of documents in D that the word occurs in. Initially, the words
@@ -351,15 +353,46 @@ def extractTargetTermsCastanet1():
         print(w, wdistribution)
  
 def extractTargetTermsCastanet2():
+    """Stoica / Hearst / Richardson: Automating Creation of Hierarchical Faceted
+    Metadata Structures, 4.2 Select Target Terms:
+    Similarly to Sanderson and Croft (1999), we use the term distribution – defined
+    as the number of item descriptions containing the term – as the selection criterion.
+    The algorithm retains those terms that have a distribution larger than a threshold
+    and eliminates terms on a stop list. One and two-word consecutive noun phrases are
+    eligible to be considered as terms. Terms that can be ad- jectives or verbs as well
+    as nouns are optionally deleted.
+    Mark Sanderson and Bruce Croft. 1999. Deriving concept hierarchies from text.
+    In Procs. of SIGIR ’99."""
     alltoklist = freqtoklistdic["all"]
 
-def extractTargetTermsTfIdf(ecoll, etextdic):
+def extractTargetTermsTfIdf(ecoll, etextdic, ntt):
+    # Result from a test run for top 10 tf-idf tokens from EWJ-1864-08-01-Ar04603
+    # slave            0.048324
+    # law              0.036512
+    # african          0.032673
+    # louisianian      0.030635
+    # husband          0.029923
+    # southern         0.025189
+    # legal            0.023055
+    # slav             0.021805
+    # master           0.019898
+    # wife             0.019664
+    # 
     for artid in artidlist:
+        # for testing
         if artid != "EWJ-1864-08-01-Ar04603":
             continue
-        for utoken in freqtoklistdic[artid]:
-            print(utoken, ecoll.tf_idf(utoken, etextdic[artid]))
-
+        tfidflist = []
+        print("%s - no of tokens: % 6d" % (artid, len(freqtoklistdic[artid])))
+        for n, utoken in enumerate(freqtoklistdic[artid]):
+            # for testing
+            # if n > 19:
+            #     break
+            tfidflist.append( [ utoken, ecoll.tf_idf(utoken, etextdic[artid]) ] )
+            # print("%05d  %-15s  %f" % (n, utoken, ecoll.tf_idf(utoken, etextdic[artid])))
+        targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)[:ntt]
+        # for s in targettermlist:
+        #     print("%-15s  %f" % (s[0], s[1]))
     
 def testNltkTextAndTextCollection(ecoll, etextdic):
     # Testing NLTK Text and TextCollection:
@@ -400,6 +433,8 @@ if __name__ == '__main__':
     parser.add_option("-m", "--method", dest="targtermmethod",
                       type="choice", choices=["castanet1", "castanet2", "tfidf"], default="castanet1",
                       help="What kind of method to use to extract target terms: castanet1 (Stoica/Hearst), castanet2 (Hearst), TF/IDF - default: %default", metavar="METHOD")
+    parser.add_option("-n", "--nooftargetterms", dest="nooftargetterms", default=10,
+                      help="Number of target terms to consider - default: %s", metavar="NUMBER")
     # parser.add_option("-x", "--fileprefix", dest="fileprefix", default="xxx",
     #                   help="Prefix for all created filenames - default: 'xxx'", metavar="PFIX")
 
@@ -409,6 +444,7 @@ if __name__ == '__main__':
     gensimoutdir = options.gensimoutdir
     targtermmethod = options.targtermmethod
     listtype = options.listtype
+    nooftargetterms = options.nooftargetterms
     
     # if processtype == "disp":
     #     srcsubdir = "freqsort"
@@ -460,7 +496,7 @@ if __name__ == '__main__':
     elif targtermmethod == "castanet2":
         extractTargetTermsCastanet1()
     elif targtermmethod == "tfidf":
-        extractTargetTermsTfIdf(ewjtextcollection, ewjtextdic)
+        extractTargetTermsTfIdf(ewjtextcollection, ewjtextdic, nooftargetterms)
     
     testNltkTextAndTextCollection(ewjtextcollection, ewjtextdic)
 
