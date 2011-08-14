@@ -391,6 +391,7 @@ def extractTargetTermsTfIdf(ecoll, etextdic, ntt, tdir, ltype):
         # if artid != "EWJ-1864-08-01-Ar04603":
         #     continue
         tfidflist = []
+        nttuse = ntt
         print("%s - no of tokens: % 6d" % (artid, len(freqtoklistdic[artid])))
         for n, utoken in enumerate(freqtoklistdic[artid]):
             # for testing
@@ -404,10 +405,12 @@ def extractTargetTermsTfIdf(ecoll, etextdic, ntt, tdir, ltype):
         targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)
         ttlistlen = len(targettermlist)
         if ttlistlen < ntt:
-            ntt = ttlistlen
+            nttuse = ttlistlen
+        else:
+            nttuse = ntt
         # for s in targettermlist:
         #     print("%-15s  %F" % (s[0], s[1]))
-        writeTargetTerms(artid, targettermlist[:ntt], tdir, ltype, "tfidf")
+        writeTargetTerms(artid, targettermlist[:nttuse], tdir, ltype, "tfidf")
 
 def writeTargetTerms(artid, ttlist, tdir, ltype, topictype):
     # ttlist:    list of topics for one article
