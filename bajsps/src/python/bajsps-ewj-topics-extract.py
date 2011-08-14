@@ -388,20 +388,26 @@ def extractTargetTermsTfIdf(ecoll, etextdic, ntt, tdir, ltype):
     # 
     for artid in artidlist:
         # for testing
-        if artid != "EWJ-1864-08-01-Ar04603":
-            continue
+        # if artid != "EWJ-1864-08-01-Ar04603":
+        #     continue
         tfidflist = []
         print("%s - no of tokens: % 6d" % (artid, len(freqtoklistdic[artid])))
         for n, utoken in enumerate(freqtoklistdic[artid]):
             # for testing
-            if n > 19:
-                break
+            # if n > 19:
+            #     break
+            # here we could add a filter that for example only uses nouns, by
+            #    looking up the POS in wordnet, but this would at this stage
+            #    considerably slow down the program 
             tfidflist.append( [ utoken, ecoll.tf_idf(utoken, etextdic[artid]) ] )
             # print("%05d  %-15s  %f" % (n, utoken, ecoll.tf_idf(utoken, etextdic[artid])))
-        targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)[:ntt]
+        targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)
+        ttlistlen = len(targettermlist)
+        if ttlistlen < ntt:
+            ntt = ttlistlen
         # for s in targettermlist:
         #     print("%-15s  %F" % (s[0], s[1]))
-        writeTargetTerms(artid, targettermlist, tdir, ltype, "tfidf")
+        writeTargetTerms(artid, targettermlist[:ntt], tdir, ltype, "tfidf")
 
 def writeTargetTerms(artid, ttlist, tdir, ltype, topictype):
     # ttlist:    list of topics for one article
@@ -454,7 +460,7 @@ if __name__ == '__main__':
     parser.add_option("-m", "--method", dest="targtermmethod",
                       type="choice", choices=["castanet1", "castanet2", "tfidf"], default="castanet1",
                       help="What kind of method to use to extract target terms: castanet1 (Stoica/Hearst), castanet2 (Hearst), TF/IDF - default: %default", metavar="METHOD")
-    parser.add_option("-n", "--nooftargetterms", dest="nooftargetterms", default=10,
+    parser.add_option("-n", "--nooftargetterms", type="int", dest="nooftargetterms", default=10,
                       help="Number of target terms to consider - default: %s", metavar="NUMBER")
     # parser.add_option("-x", "--fileprefix", dest="fileprefix", default="xxx",
     #                   help="Prefix for all created filenames - default: 'xxx'", metavar="PFIX")
