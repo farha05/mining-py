@@ -41,6 +41,14 @@ def getInfileList(epath):
     ilist = sorted(ilist)
     return ilist
 
+def makeOutDir(basedir, subdir):
+    leafdir = os.path.join(basedir, subdir)
+    if not os.path.exists(basedir):
+        os.mkdir(basedir)
+    if not os.path.exists(leafdir):
+        os.mkdir(leafdir)
+    return leafdir
+
 def removeStopWords(tl):
     cl = [w for w in tl if w.lower() not in stopwords]
     return cl
@@ -386,18 +394,26 @@ def extractTargetTermsTfIdf(ecoll, etextdic, ntt, tdir, ltype):
         print("%s - no of tokens: % 6d" % (artid, len(freqtoklistdic[artid])))
         for n, utoken in enumerate(freqtoklistdic[artid]):
             # for testing
-            # if n > 19:
-            #     break
+            if n > 19:
+                break
             tfidflist.append( [ utoken, ecoll.tf_idf(utoken, etextdic[artid]) ] )
             # print("%05d  %-15s  %f" % (n, utoken, ecoll.tf_idf(utoken, etextdic[artid])))
         targettermlist = sorted(tfidflist, key=itemgetter(1), reverse=True)[:ntt]
         # for s in targettermlist:
-        #     print("%-15s  %f" % (s[0], s[1]))
-        writeTargetTerms(targettermlist, tdir, ltype)
+        #     print("%-15s  %F" % (s[0], s[1]))
+        writeTargetTerms(artid, targettermlist, tdir, ltype, "tfidf")
 
-def writeTargetTerms(ttlist, tdir, ltype):
-    print(tdir, ltype)
-    
+def writeTargetTerms(artid, ttlist, tdir, ltype, topictype):
+    # ttlist:    list of topics for one article
+    # tdir:      base dir for topics
+    # ltype:     list type (low, stw, wlo, wst, etc.)
+    # topictype: type of topic, i. e. how they were generated (e. g. tfidf)
+    tdir = makeOutDir(tdir, topictype)
+    tdir = makeOutDir(tdir, ltype)
+    tfilepath = os.path.join(tdir, artid + ".txt")
+    toutobj = file(tfilepath, "w")
+    for s in ttlist:
+        print("%s\t%f" % (s[0], s[1]), file=toutobj)
     
 def testNltkTextAndTextCollection(ecoll, etextdic):
     # Testing NLTK Text and TextCollection:
