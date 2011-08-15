@@ -23,11 +23,7 @@ import logging
 
 stopwords = nltk.corpus.stopwords.words('english')
 
-freqdic = {}
-freqtoklistdic = {}
-freqfrqlistdic = {}
-unsorttoklistdic = {}
-unsorttokperpublist = []
+topichierdic = {}
 
 def makeOutDir(basedir, subdir):
     leafdir = os.path.join(basedir, subdir)
@@ -52,22 +48,29 @@ def getArtidListFromFileList(indir):
     aidlist = [ f[:-4] for f in filelist if f.endswith(".txt")]
     return aidlist
 
-def getTopicTermDics(indir, aidlist):
+def getTopicTermDics(indir, aidlist, ntt):
     topictermlistdic = {}
     topictfidflistdic = {}
     for artid in aidlist:
+        nttuse = ntt
         infile = "%s.txt" % (artid, )
         infilepath = os.path.join(indir, infile)
         fobj = file(infilepath, "r")
         artlist = fobj.readlines()
+        ttlistlen = len(artlist)
+        if ttlistlen < ntt:
+            nttuse = ttlistlen
+        else:
+            nttuse = ntt
         # freqdic["all"] = [e.strip().split("\t") for e in alllist]
-        topictermlistdic[artid] = [e.strip().split("\t")[0] for e in artlist]
-        topictfidflistdic[artid] = [e.strip().split("\t")[1] for e in artlist]
+        topictermlistdic[artid] = [e.strip().split("\t")[0] for e in artlist[:nttuse]]
+        topictfidflistdic[artid] = [e.strip().split("\t")[1] for e in artlist[:nttuse]]
         fobj.close()
     return topictermlistdic, topictfidflistdic
 
-def generateTopicHierarchies(ttedic, ttfdic):
-    pass
+def generateTopicHierarchies(aidlist, ttedic, ttfdic):
+    for artid in aidlist:
+        print(artid, ttedic[artid])
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -95,15 +98,15 @@ if __name__ == '__main__':
     print("Read article ids - artidlist")
     artidlist = getArtidListFromFileList(indir)
     
-    # print("Read topics per article.")
-    topictermdic, topictfidfdic = getTopicTermDics(indir, artidlist)
+    print("Read topics per article.")
+    topictermdic, topictfidfdic = getTopicTermDics(indir, artidlist, nooftargetterms)
         
     if targtermmethod == "castanet1":
-        generateTopicHierarchies(topictermdic, topictfidfdic)
+        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
     elif targtermmethod == "castanet2":
-        generateTopicHierarchies(topictermdic, topictfidfdic)
+        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
     elif targtermmethod == "tfidf":
-        generateTopicHierarchies(topictermdic, topictfidfdic)
+        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
     
 
     print("--== FINISHED ==--")
