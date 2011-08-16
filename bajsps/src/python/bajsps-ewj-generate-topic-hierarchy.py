@@ -73,19 +73,57 @@ def getTopicTermDics(indir, aidlist, ntt):
     alltopicslist = list(alltopicsset)
     return topictermlistdic, topictfidflistdic, alltopicslist
 
+def generateHolonyms(atlist):
+    # explore holonyms
+    # not very helpful
+    holonymsmemberdic = {}
+    holonymspartdic = {}
+    holonymssubstancedic = {}
+    for topicleaf in atlist:
+        # topicsynsets = wordnet.synsets(topicleaf)
+        # only choose nouns instead
+        topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
+        if len(topicsynsetslist) > 0:
+            topicsynset = topicsynsetslist[0]
+            holonymsmemberdic[topicleaf] = topicsynset.member_holonyms()
+            holonymspartdic[topicleaf] = topicsynset.part_holonyms()
+            holonymssubstancedic[topicleaf] = topicsynset.substance_holonyms()
+        else:
+            print(topicleaf)
+    print("Holonyms member")
+    for h in holonymsmemberdic.keys():
+        if len(holonymsmemberdic[h]) > 0:
+            print(h, holonymsmemberdic[h])
+    print("Holonyms part")
+    for h in holonymspartdic.keys():
+        if len(holonymspartdic[h]) > 0:
+            print(h, holonymspartdic[h])
+    print("Holonyms substance")
+    for h in holonymssubstancedic.keys():
+        if len(holonymssubstancedic[h]) > 0:
+            print(h, holonymssubstancedic[h])
+    return holonymsmemberdic, holonymspartdic, holonymssubstancedic
+
 def generateTopicHierarchies(atlist):
     # see: api/nltk.corpus.reader.wordnet.Synset-class.html
     # see: api/nltk.corpus.reader.wordnet._WordNetObject-class.html
+    hypernympathsdic = {}
     # print(len(atlist))
     for topicleaf in atlist:
         # topicsynsets = wordnet.synsets(topicleaf)
-        # only choose nouns
+        # only choose nouns instead
         topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
         if len(topicsynsetslist) > 0:
             topicsynset = topicsynsetslist[0]
             # print(topicleaf, topicsynset.hypernyms())
             # print(topicleaf, topicsynset.root_hypernyms())
-            print(topicleaf, topicsynset.hypernym_paths())
+            # print(topicleaf, topicsynset.hypernym_paths())
+            hypernympathsdic[topicleaf] = topicsynset.hypernym_paths()
+        # else:
+            # print(topicleaf)
+    # print(len(hypernympathsdic.keys()))
+    return hypernympathsdic
+
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -117,11 +155,11 @@ if __name__ == '__main__':
     topictermdic, topictfidfdic, alltopicslist = getTopicTermDics(indir, artidlist, nooftargetterms)
         
     if targtermmethod == "castanet1":
-        generateTopicHierarchies(alltopicslist)
+        hypernympathsdic = generateTopicHierarchies(alltopicslist)
     elif targtermmethod == "castanet2":
-        generateTopicHierarchies(alltopicslist)
+        hypernympathsdic = generateTopicHierarchies(alltopicslist)
     elif targtermmethod == "tfidf":
-        generateTopicHierarchies(alltopicslist)
+        hypernympathsdic = generateTopicHierarchies(alltopicslist)
     
 
     print("--== FINISHED ==--")
