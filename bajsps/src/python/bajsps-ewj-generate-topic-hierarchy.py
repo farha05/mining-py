@@ -51,6 +51,7 @@ def getArtidListFromFileList(indir):
 def getTopicTermDics(indir, aidlist, ntt):
     topictermlistdic = {}
     topictfidflistdic = {}
+    alltopicslist = []
     for artid in aidlist:
         nttuse = ntt
         infile = "%s.txt" % (artid, )
@@ -65,12 +66,17 @@ def getTopicTermDics(indir, aidlist, ntt):
         # freqdic["all"] = [e.strip().split("\t") for e in alllist]
         topictermlistdic[artid] = [e.strip().split("\t")[0] for e in artlist[:nttuse]]
         topictfidflistdic[artid] = [e.strip().split("\t")[1] for e in artlist[:nttuse]]
+        for l in topictermlistdic[artid]:
+            alltopicslist.append(l)
         fobj.close()
-    return topictermlistdic, topictfidflistdic
+    alltopicsset = set(alltopicslist)
+    alltopicslist = list(alltopicsset)
+    return topictermlistdic, topictfidflistdic, alltopicslist
 
-def generateTopicHierarchies(aidlist, ttedic, ttfdic):
-    for artid in aidlist:
-        print(artid, ttedic[artid])
+def generateTopicHierarchies(atlist):
+    print(len(atlist))
+    # for topicleaf in atlist:
+    #     print(topicleaf)
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -99,14 +105,14 @@ if __name__ == '__main__':
     artidlist = getArtidListFromFileList(indir)
     
     print("Read topics per article.")
-    topictermdic, topictfidfdic = getTopicTermDics(indir, artidlist, nooftargetterms)
+    topictermdic, topictfidfdic, alltopicslist = getTopicTermDics(indir, artidlist, nooftargetterms)
         
     if targtermmethod == "castanet1":
-        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
+        generateTopicHierarchies(alltopicslist)
     elif targtermmethod == "castanet2":
-        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
+        generateTopicHierarchies(alltopicslist)
     elif targtermmethod == "tfidf":
-        generateTopicHierarchies(artidlist, topictermdic, topictfidfdic)
+        generateTopicHierarchies(alltopicslist)
     
 
     print("--== FINISHED ==--")
