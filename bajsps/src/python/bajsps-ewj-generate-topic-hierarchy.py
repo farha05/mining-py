@@ -74,9 +74,18 @@ def getTopicTermDics(indir, aidlist, ntt):
     return topictermlistdic, topictfidflistdic, alltopicslist
 
 def generateTopicHierarchies(atlist):
-    print(len(atlist))
-    # for topicleaf in atlist:
-    #     print(topicleaf)
+    # see: api/nltk.corpus.reader.wordnet.Synset-class.html
+    # see: api/nltk.corpus.reader.wordnet._WordNetObject-class.html
+    # print(len(atlist))
+    for topicleaf in atlist:
+        # topicsynsets = wordnet.synsets(topicleaf)
+        # only choose nouns
+        topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
+        if len(topicsynsetslist) > 0:
+            topicsynset = topicsynsetslist[0]
+            # print(topicleaf, topicsynset.hypernyms())
+            # print(topicleaf, topicsynset.root_hypernyms())
+            print(topicleaf, topicsynset.hypernym_paths())
 
 if __name__ == '__main__':
     parser = OptionParser()
