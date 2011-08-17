@@ -9,6 +9,7 @@ import string
 import re
 import types
 import os, os.path
+from pprint import pprint
 # import cPickle
 from operator import itemgetter, attrgetter
 from optparse import OptionParser
@@ -109,9 +110,10 @@ def generateTopicHierarchies(atlist):
     # see: api/nltk.corpus.reader.wordnet._WordNetObject-class.html
     hypernympathsdic = {}
     # print(len(atlist))
+    testset = set()
     # ---------------------------------------------
     # for topicleaf in atlist:
-    for topicleaf in atlist[:30]:#<<<<-------------- CHANGE!!!
+    for topicleaf in atlist[:30]:#<<<<------------------------------------------ CHANGE!!!
     # ---------------------------------------------
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
@@ -123,15 +125,19 @@ def generateTopicHierarchies(atlist):
             # print(topicsynset.hypernym_distances())
             # print(topicleaf, topicsynset.hypernyms())
             # print(topicleaf, topicsynset.root_hypernyms())
-            print(topicleaf, topicsynset.hypernym_paths())
+            pprint(topicsynset.hypernym_paths())
+            hyp = lambda s:s.hypernyms()
+            pprint(topicsynset.tree(hyp))
             hypernympathsdic[topicleaf] = topicsynset.hypernym_paths()
         # else:
             # print(topicleaf)
     # print(len(hypernympathsdic.keys()))
+    print("=" * 50)
     return hypernympathsdic
 
 def testPermute(hypnympathsdic):
-    pass
+    for tl in hypnympathsdic:
+        print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -168,6 +174,8 @@ if __name__ == '__main__':
         hypernympathsdic = generateTopicHierarchies(alltopicslist)
     elif targtermmethod == "tfidf":
         hypernympathsdic = generateTopicHierarchies(alltopicslist)
+        
+    testPermute(hypernympathsdic)
     
 
     print("--== FINISHED ==--")
