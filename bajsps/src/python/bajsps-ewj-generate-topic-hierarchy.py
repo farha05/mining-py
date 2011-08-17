@@ -109,21 +109,29 @@ def generateTopicHierarchies(atlist):
     # see: api/nltk.corpus.reader.wordnet._WordNetObject-class.html
     hypernympathsdic = {}
     # print(len(atlist))
-    for topicleaf in atlist:
+    # ---------------------------------------------
+    # for topicleaf in atlist:
+    for topicleaf in atlist[:30]:#<<<<-------------- CHANGE!!!
+    # ---------------------------------------------
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
         topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
         if len(topicsynsetslist) > 0:
             topicsynset = topicsynsetslist[0]
+            print("-" * 30)
+            print(topicsynset)
+            # print(topicsynset.hypernym_distances())
             # print(topicleaf, topicsynset.hypernyms())
             # print(topicleaf, topicsynset.root_hypernyms())
-            # print(topicleaf, topicsynset.hypernym_paths())
+            print(topicleaf, topicsynset.hypernym_paths())
             hypernympathsdic[topicleaf] = topicsynset.hypernym_paths()
         # else:
             # print(topicleaf)
     # print(len(hypernympathsdic.keys()))
     return hypernympathsdic
 
+def testPermute(hypnympathsdic):
+    pass
 
 if __name__ == '__main__':
     parser = OptionParser()
