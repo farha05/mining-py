@@ -138,6 +138,15 @@ def generateTopicHierarchies(atlist):
 def testPermute(hypnympathsdic):
     for tl in hypnympathsdic:
         print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
+    hnpl = hypnympathsdic.keys()
+    print("-" * 30)
+    for n, h in enumerate(hnpl):
+        print(hnpl[n], hnpl[n+1]) 
+        print(hypnympathsdic[hnpl[n]][0][-1:], hypnympathsdic[hnpl[n+1]][0][-1:])
+        print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
+         
+        
+        
 
 if __name__ == '__main__':
     parser = OptionParser()
