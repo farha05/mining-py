@@ -119,32 +119,52 @@ def generateTopicHierarchies(atlist):
         # only choose nouns instead
         topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
         if len(topicsynsetslist) > 0:
+            # only use first synset, explore if later we could use all synsets
             topicsynset = topicsynsetslist[0]
-            print("-" * 30)
-            print(topicsynset)
+            # print("-" * 30)
+            # print(topicsynset)
             # print(topicsynset.hypernym_distances())
             # print(topicleaf, topicsynset.hypernyms())
             # print(topicleaf, topicsynset.root_hypernyms())
-            pprint(topicsynset.hypernym_paths())
-            hyp = lambda s:s.hypernyms()
-            pprint(topicsynset.tree(hyp))
+            # hyppathlist = getHypernymPaths(topicsynset)
+            # hyptreelist = getHypernymTree(topicsynset)
             hypernympathsdic[topicleaf] = topicsynset.hypernym_paths()
         # else:
             # print(topicleaf)
     # print(len(hypernympathsdic.keys()))
-    print("=" * 50)
+    # print("=" * 50)
     return hypernympathsdic
+
+def getHypernymTree(tsynset):
+    hyp = lambda s:s.hypernyms()
+    treelist = tsynset.tree(hyp)
+    pprint(treelist)
+    return treelist
+
+def getHypernymPaths(tsynset):
+    pathlist = tsynset.hypernym_paths()
+    pprint(pathlist)
+    return pathlist
 
 def testPermute(hypnympathsdic):
     for tl in hypnympathsdic:
         print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
     hnpl = hypnympathsdic.keys()
     print("-" * 30)
-    for n, h in enumerate(hnpl):
-        print(hnpl[n], hnpl[n+1]) 
-        print(hypnympathsdic[hnpl[n]][0][-1:], hypnympathsdic[hnpl[n+1]][0][-1:])
-        print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
+    print(len((hnpl)))
+    # for n, h in enumerate(hnpl):
+    #     print(hnpl[n], hnpl[n+1]) 
+    #     print(hypnympathsdic[hnpl[n]][0][-1:], hypnympathsdic[hnpl[n+1]][0][-1:])
+    #     # how does one call _lcs_by_depth ???
+    #     print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
          
+    for t1 in hypnympathsdic:
+        s1 = hypnympathsdic[t1][0][-1]
+        for t2 in hypnympathsdic:
+            s2 = hypnympathsdic[t2][0][-1]
+            print("-" * 30)
+            print(s1, s2)
+            print(s1.common_hypernyms(s2))
         
         
 
