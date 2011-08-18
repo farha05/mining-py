@@ -159,12 +159,15 @@ def testPermute(hypnympathsdic):
     #     print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
          
     for t1 in hypnympathsdic:
+        # last in list is synset for t1
         s1 = hypnympathsdic[t1][0][-1]
         for t2 in hypnympathsdic:
+            # last in list is synset for t2
             s2 = hypnympathsdic[t2][0][-1]
             print("-" * 30)
             print(s1, s2)
             print(s1.common_hypernyms(s2))
+            print(s1.shortest_path_distance(s2))
         
         
 
