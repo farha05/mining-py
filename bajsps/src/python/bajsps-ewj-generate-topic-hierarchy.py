@@ -199,6 +199,7 @@ def testPermuteOld(hypnympathsdic):
     print("COMBICOUNT:", combicount)
 
 def testCombine(hypnympathsdic):
+    # 4,759 topics --> 11,321,661 combinations
     hnpl = hypnympathsdic.keys()
     combicount = 0         
     actualcombicount = 0         
@@ -216,14 +217,14 @@ def testCombine(hypnympathsdic):
         # only print cases where more than 3 common hypernyms
         if len(ch) > 0:
             actualcombicount += 1
-#            print("-" * 30)
-#            print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
-#            print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
-#            print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
-#            # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
-#            print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chordered]))
-#            print("LH: " + " -- ".join([s.name[:s.name.index(".")] for s in lh]))
-#            print("SP:", sp)
+            print("-" * 30)
+            print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
+            print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
+            print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
+            # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+            print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chordered]))
+            print("LH: " + " -- ".join([s.name[:s.name.index(".")] for s in lh]))
+            print("SP:", sp)
         else:
             print("NOCOMMONHYPERNYMS:", t1, t2)
     print("COMBICOUNT:      ", combicount)
