@@ -159,15 +159,28 @@ def testPermute(hypnympathsdic):
     #     print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
          
     for t1 in hypnympathsdic:
+        # hypernym path
+        h1 = hypnympathsdic[t1][0]
         # last in list is synset for t1
-        s1 = hypnympathsdic[t1][0][-1]
+        s1 = h1[-1]
         for t2 in hypnympathsdic:
+            # hypernym path
+            h2 = hypnympathsdic[t2][0]
             # last in list is synset for t2
-            s2 = hypnympathsdic[t2][0][-1]
-            print("-" * 30)
-            print(s1, s2)
-            print(s1.common_hypernyms(s2))
-            print(s1.shortest_path_distance(s2))
+            s2 = h2[-1]
+            if s1 != s2:
+                ch = s1.common_hypernyms(s2)
+                sp = s1.shortest_path_distance(s2)
+                # only print cases where more than 3 common hypernyms
+                if len(ch) > 3:
+                    print("-" * 30)
+                    # print(s1, s2)
+                    print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
+                    print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
+                    print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
+                    # print(ch)
+                    print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+                    print("SP:", sp)
         
         
 
