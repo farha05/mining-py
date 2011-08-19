@@ -11,6 +11,7 @@ import types
 import os, os.path
 from pprint import pprint
 import itertools
+import etree
 # import cPickle
 from operator import itemgetter, attrgetter
 from optparse import OptionParser
@@ -113,8 +114,8 @@ def generateTopicHierarchies(atlist):
     # print(len(atlist))
     testset = set()
     # ---------------------------------------------
-    for topicleaf in atlist:
-    # for topicleaf in atlist[:30]:#<<<<------------------------------------------ CHANGE!!!
+    # for topicleaf in atlist:
+    for topicleaf in atlist[:50]:#<<<<------------------------------------------ CHANGE!!!
     # ---------------------------------------------
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
@@ -199,8 +200,11 @@ def testPermuteOld(hypnympathsdic):
     print("COMBICOUNT:", combicount)
 
 def testCombine(hypnympathsdic):
+    # number of combinations: (topics * (topics - 1))/2
     # 4,759 topics --> 11,321,661 combinations
     hnpl = hypnympathsdic.keys()
+    nooftopics = len(hnpl)
+    print("NO OF TOPICS:    ", nooftopics)
     combicount = 0         
     actualcombicount = 0         
     for (t1, t2) in itertools.combinations(hnpl, 2):
@@ -229,6 +233,7 @@ def testCombine(hypnympathsdic):
             print("NOCOMMONHYPERNYMS:", t1, t2)
     print("COMBICOUNT:      ", combicount)
     print("ACTUALCOMBICOUNT:", actualcombicount)
+    print("NO OF TOPICS:    ", nooftopics)
 
 def testPermute(hypnympathsdic):
     hnpl = hypnympathsdic.keys()
@@ -259,6 +264,11 @@ def testPermute(hypnympathsdic):
     print("COMBICOUNT:      ", combicount)
     print("ACTUALCOMBICOUNT:", actualcombicount)
 
+def generateXmlSynsetTree(hypnympathsdic):
+    root = etree.Element("entity")
+    print(root)
+    return root
+    
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -297,7 +307,8 @@ if __name__ == '__main__':
         hypernympathsdic = generateTopicHierarchies(alltopicslist)
         
     # testPermute(hypernympathsdic)
-    testCombine(hypernympathsdic)
+    # testCombine(hypernympathsdic)
+    xmltree = generateXmlSynsetTree(hypernympathsdic)
     
 
     print("--== FINISHED ==--")
