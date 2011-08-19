@@ -118,9 +118,19 @@ def generateTopicHierarchies(atlist):
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
         topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
-        if len(topicsynsetslist) > 0:
+        topicsynsetslistlen = len(topicsynsetslist)
+        if topicsynsetslistlen > 0:
             # only use first synset, explore if later we could use all synsets
             topicsynset = topicsynsetslist[0]
+
+            # tslcnt = 0
+            # hnplistlen = 1
+            # while tslcnt < topicsynsetslistlen:
+            #     hnplist = getHypernymPaths(topicsynsetslist[tslcnt])[0]
+            #     hnplistlen = len(hnplist)
+            #     print("--------------------------", hnplistlen)
+            #     tslcnt += 1
+
             # print("-" * 30)
             # print(topicsynset)
             # print(topicsynset.hypernym_distances())
@@ -128,11 +138,18 @@ def generateTopicHierarchies(atlist):
             # print(topicleaf, topicsynset.root_hypernyms())
             # hyppathlist = getHypernymPaths(topicsynset)
             # hyptreelist = getHypernymTree(topicsynset)
-            hypernympathsdic[topicleaf] = topicsynset.hypernym_paths()
-        # else:
-            # print(topicleaf)
-    # print(len(hypernympathsdic.keys()))
-    # print("=" * 50)
+            
+            hyppaths = getHypernymPaths(topicsynset)
+            hyppathslen = len(hyppaths)
+            
+            # if hyppathslen > 1:
+            #     hypernympathsdic[topicleaf] = hyppaths
+            # else:
+            #     if topicsynsetslistlen > 1:
+            #         pass 
+
+
+            
     return hypernympathsdic
 
 def getHypernymTree(tsynset):
@@ -142,13 +159,14 @@ def getHypernymTree(tsynset):
     return treelist
 
 def getHypernymPaths(tsynset):
-    pathlist = tsynset.hypernym_paths()
-    pprint(pathlist)
+    pathlist = tsynset.hypernym_paths()[0]
+    # pprint(pathlist)
     return pathlist
 
 def testPermute(hypnympathsdic):
     for tl in hypnympathsdic:
-        print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
+        # print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
+        print(tl, len(hypnympathsdic[tl]), hypnympathsdic[tl])
     hnpl = hypnympathsdic.keys()
     print("-" * 30)
     print(len((hnpl)))
@@ -160,16 +178,19 @@ def testPermute(hypnympathsdic):
          
     for t1 in hypnympathsdic:
         # hypernym path
-        h1 = hypnympathsdic[t1][0]
+        # h1 = hypnympathsdic[t1][0]
+        h1 = hypnympathsdic[t1]
         # last in list is synset for t1
         s1 = h1[-1]
         for t2 in hypnympathsdic:
             # hypernym path
-            h2 = hypnympathsdic[t2][0]
+            # h2 = hypnympathsdic[t2][0]
+            h2 = hypnympathsdic[t2]
             # last in list is synset for t2
             s2 = h2[-1]
             if s1 != s2:
                 ch = s1.common_hypernyms(s2)
+                # ch.reverse()
                 sp = s1.shortest_path_distance(s2)
                 # only print cases where more than 3 common hypernyms
                 if len(ch) > 3:
@@ -177,7 +198,7 @@ def testPermute(hypnympathsdic):
                     # print(s1, s2)
                     print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
                     print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
-                    print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
+                    print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
                     # print(ch)
                     print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
                     print("SP:", sp)
