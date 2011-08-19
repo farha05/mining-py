@@ -120,36 +120,15 @@ def generateTopicHierarchies(atlist):
         topicsynsetslist = wordnet.synsets(topicleaf, pos=wordnet.NOUN)
         topicsynsetslistlen = len(topicsynsetslist)
         if topicsynsetslistlen > 0:
-            # only use first synset, explore if later we could use all synsets
-            topicsynset = topicsynsetslist[0]
-
-            # tslcnt = 0
-            # hnplistlen = 1
-            # while tslcnt < topicsynsetslistlen:
-            #     hnplist = getHypernymPaths(topicsynsetslist[tslcnt])[0]
-            #     hnplistlen = len(hnplist)
-            #     print("--------------------------", hnplistlen)
-            #     tslcnt += 1
-
-            # print("-" * 30)
-            # print(topicsynset)
-            # print(topicsynset.hypernym_distances())
-            # print(topicleaf, topicsynset.hypernyms())
-            # print(topicleaf, topicsynset.root_hypernyms())
-            # hyppathlist = getHypernymPaths(topicsynset)
-            # hyptreelist = getHypernymTree(topicsynset)
-            
-            hyppaths = getHypernymPaths(topicsynset)
-            hyppathslen = len(hyppaths)
-            
-            # if hyppathslen > 1:
-            #     hypernympathsdic[topicleaf] = hyppaths
-            # else:
-            #     if topicsynsetslistlen > 1:
-            #         pass 
-
-
-            
+            # use first synset that has a hypernympath longer than 1, otherwise
+            #     don't use this synset at all 
+            # explore if later we could use all synsets
+            for topicsynset in topicsynsetslist:
+                hyppaths = getHypernymPaths(topicsynset)
+                hyppathslen = len(hyppaths)
+                if hyppathslen > 1:
+                    hypernympathsdic[topicleaf] = hyppaths
+                    break
     return hypernympathsdic
 
 def getHypernymTree(tsynset):
@@ -190,7 +169,8 @@ def testPermute(hypnympathsdic):
             s2 = h2[-1]
             if s1 != s2:
                 ch = s1.common_hypernyms(s2)
-                # ch.reverse()
+                # reverse common hypernyms list to start with root
+                chrev = reversed(ch)
                 sp = s1.shortest_path_distance(s2)
                 # only print cases where more than 3 common hypernyms
                 if len(ch) > 3:
@@ -200,7 +180,8 @@ def testPermute(hypnympathsdic):
                     print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
                     print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
                     # print(ch)
-                    print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+                    # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+                    print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chrev]))
                     print("SP:", sp)
         
         
