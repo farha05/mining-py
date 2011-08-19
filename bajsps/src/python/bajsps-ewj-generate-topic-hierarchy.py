@@ -10,6 +10,7 @@ import re
 import types
 import os, os.path
 from pprint import pprint
+import itertools
 # import cPickle
 from operator import itemgetter, attrgetter
 from optparse import OptionParser
@@ -112,8 +113,8 @@ def generateTopicHierarchies(atlist):
     # print(len(atlist))
     testset = set()
     # ---------------------------------------------
-    # for topicleaf in atlist:
-    for topicleaf in atlist[:30]:#<<<<------------------------------------------ CHANGE!!!
+    for topicleaf in atlist:
+    # for topicleaf in atlist[:30]:#<<<<------------------------------------------ CHANGE!!!
     # ---------------------------------------------
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
@@ -142,19 +143,30 @@ def getHypernymPaths(tsynset):
     # pprint(pathlist)
     return pathlist
 
-def testPermute(hypnympathsdic):
-    for tl in hypnympathsdic:
-        # print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
-        print(tl, len(hypnympathsdic[tl]), hypnympathsdic[tl])
+def putCommonHypernymsInOrder(s, h):
+    # as common_hypernyms are unsorted (result of set operations)
+    # we order them in the same order as the hypernyms
+    # slist = [e for e in s]
+    hordered = [e for e in s if e in h]
+    return hordered
+
+def testPermuteOld(hypnympathsdic):
+    # can be rewritten more elegantly using itertools.permutations
+    # see below
+    # 
+    # for tl in hypnympathsdic:
+    #     # print(tl, len(hypnympathsdic[tl][0]), hypnympathsdic[tl][0])
+    #     print(tl, len(hypnympathsdic[tl]), hypnympathsdic[tl])
     hnpl = hypnympathsdic.keys()
-    print("-" * 30)
-    print(len((hnpl)))
+    # print("-" * 30)
+    # print(len((hnpl)))
     # for n, h in enumerate(hnpl):
     #     print(hnpl[n], hnpl[n+1]) 
     #     print(hypnympathsdic[hnpl[n]][0][-1:], hypnympathsdic[hnpl[n+1]][0][-1:])
     #     # how does one call _lcs_by_depth ???
     #     print(wordnet._lcs_by_depth(hypnympathsdic[hnpl[n]][0][-1:][0], hypnympathsdic[hnpl[n+1]][0][-1:][0]))
-         
+
+    combicount = 0         
     for t1 in hypnympathsdic:
         # hypernym path
         # h1 = hypnympathsdic[t1][0]
@@ -168,23 +180,84 @@ def testPermute(hypnympathsdic):
             # last in list is synset for t2
             s2 = h2[-1]
             if s1 != s2:
+                combicount += 1
                 ch = s1.common_hypernyms(s2)
                 # reverse common hypernyms list to start with root
-                chrev = reversed(ch)
+                chordered = putCommonHypernymsInOrder(h1, ch)
+                lh = s1.lowest_common_hypernyms(s2)
                 sp = s1.shortest_path_distance(s2)
                 # only print cases where more than 3 common hypernyms
-                if len(ch) > 3:
+                if len(ch) > 0:
                     print("-" * 30)
-                    # print(s1, s2)
                     print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
                     print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
                     print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
-                    # print(ch)
                     # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
-                    print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chrev]))
+                    print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chordered]))
+                    print("LH: " + " -- ".join([s.name[:s.name.index(".")] for s in lh]))
                     print("SP:", sp)
-        
-        
+    print("COMBICOUNT:", combicount)
+
+def testCombine(hypnympathsdic):
+    hnpl = hypnympathsdic.keys()
+    combicount = 0         
+    actualcombicount = 0         
+    for (t1, t2) in itertools.combinations(hnpl, 2):
+        h1 = hypnympathsdic[t1]
+        s1 = h1[-1]
+        h2 = hypnympathsdic[t2]
+        s2 = h2[-1]
+        combicount += 1
+        ch = s1.common_hypernyms(s2)
+        # reverse common hypernyms list to start with root
+        chordered = putCommonHypernymsInOrder(h1, ch)
+        lh = s1.lowest_common_hypernyms(s2)
+        sp = s1.shortest_path_distance(s2)
+        # only print cases where more than 3 common hypernyms
+        if len(ch) > 0:
+            actualcombicount += 1
+#            print("-" * 30)
+#            print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
+#            print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
+#            print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
+#            # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+#            print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chordered]))
+#            print("LH: " + " -- ".join([s.name[:s.name.index(".")] for s in lh]))
+#            print("SP:", sp)
+        else:
+            print("NOCOMMONHYPERNYMS:", t1, t2)
+    print("COMBICOUNT:      ", combicount)
+    print("ACTUALCOMBICOUNT:", actualcombicount)
+
+def testPermute(hypnympathsdic):
+    hnpl = hypnympathsdic.keys()
+    combicount = 0         
+    actualcombicount = 0         
+    for (t1, t2) in itertools.permutations(hnpl, 2):
+        h1 = hypnympathsdic[t1]
+        s1 = h1[-1]
+        h2 = hypnympathsdic[t2]
+        s2 = h2[-1]
+        combicount += 1
+        ch = s1.common_hypernyms(s2)
+        # reverse common hypernyms list to start with root
+        chordered = putCommonHypernymsInOrder(h1, ch)
+        lh = s1.lowest_common_hypernyms(s2)
+        sp = s1.shortest_path_distance(s2)
+        # only print cases where more than 3 common hypernyms
+        if len(ch) > 3:
+            actualcombicount += 1
+            print("-" * 30)
+            print("%s <--> %s" % (s1.name[:s1.name.index(".")], s2.name[:s2.name.index(".")]))
+            print("H1: " + " --> ".join([s.name[:s.name.index(".")] for s in h1]))
+            print("H2: " + " --> ".join([s.name[:s.name.index(".")] for s in h2]))
+            # print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in ch]))
+            print("CH: " + " --> ".join([s.name[:s.name.index(".")] for s in chordered]))
+            print("LH: " + " -- ".join([s.name[:s.name.index(".")] for s in lh]))
+            print("SP:", sp)
+    print("COMBICOUNT:      ", combicount)
+    print("ACTUALCOMBICOUNT:", actualcombicount)
+
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -222,7 +295,8 @@ if __name__ == '__main__':
     elif targtermmethod == "tfidf":
         hypernympathsdic = generateTopicHierarchies(alltopicslist)
         
-    testPermute(hypernympathsdic)
+    # testPermute(hypernympathsdic)
+    testCombine(hypernympathsdic)
     
 
     print("--== FINISHED ==--")
