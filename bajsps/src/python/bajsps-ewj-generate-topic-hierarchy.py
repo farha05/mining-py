@@ -115,8 +115,8 @@ def generateTopicHierarchies(atlist):
     # print(len(atlist))
     testset = set()
     # ---------------------------------------------
-    # for topicleaf in atlist:
-    for topicleaf in atlist[:50]:#<<<<------------------------------------------ CHANGE!!!
+    for topicleaf in atlist:
+    # for topicleaf in atlist[:50]:#<<<<------------------------------------------ CHANGE!!!
     # ---------------------------------------------
         # topicsynsets = wordnet.synsets(topicleaf)
         # only choose nouns instead
@@ -266,22 +266,36 @@ def testPermute(hypnympathsdic):
     print("ACTUALCOMBICOUNT:", actualcombicount)
 
 def generateXmlSynsetTree(hypnympathsdic):
+    # model the hierarchical hypernympaths, which is a subset of the whole
+    #    Wordnet topic tree in XML
+    # write the resulting XML tree into a file for checking
+    # 
+    # test run on complete EWJ - first 10 TF-IDF topics for each article:
+    #   generates 8868 topics (if synset list longer than 1) 
+    #   3 topics do not start with "entity" - disregarded (e. g. channel_island --> guernsey) 
     root = ET.Element("entity")
     hnpl = hypnympathsdic.keys()
     nooftopics = len(hnpl)
     print("NO OF TOPICS:    ", nooftopics)
     for topic in hnpl:
         # print(topic)
+        currelement = root
         topicsynsetlist = hypnympathsdic[topic]
         topicnameslist = [s.name[:s.name.index(".")] for s in topicsynsetlist]
         if topicnameslist[0] != 'entity':
-            print("hypernympathlist does not start with 'entity'")
+            print("--- hypernympathlist does not start with 'entity'")
+            print(" --> ".join(topicnameslist))
         else:
             for htopic in topicnameslist[1:]:
-                pass
-            
-
-    print(root)
+                htopic = htopic.replace("'", ".")
+                childelement = currelement.find(htopic) 
+                if childelement == None:
+                    currelement = ET.SubElement(currelement, htopic)
+                else:
+                    currelement = childelement
+    outobj = file("topics.xml", 'w')
+    ET.ElementTree(root).write(outobj)
+    outobj.close()
     return root
     
 
