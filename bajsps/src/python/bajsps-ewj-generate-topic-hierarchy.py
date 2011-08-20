@@ -11,7 +11,8 @@ import types
 import os, os.path
 from pprint import pprint
 import itertools
-import etree
+# import etree
+import xml.etree.ElementTree as ET
 # import cPickle
 from operator import itemgetter, attrgetter
 from optparse import OptionParser
@@ -265,7 +266,21 @@ def testPermute(hypnympathsdic):
     print("ACTUALCOMBICOUNT:", actualcombicount)
 
 def generateXmlSynsetTree(hypnympathsdic):
-    root = etree.Element("entity")
+    root = ET.Element("entity")
+    hnpl = hypnympathsdic.keys()
+    nooftopics = len(hnpl)
+    print("NO OF TOPICS:    ", nooftopics)
+    for topic in hnpl:
+        # print(topic)
+        topicsynsetlist = hypnympathsdic[topic]
+        topicnameslist = [s.name[:s.name.index(".")] for s in topicsynsetlist]
+        if topicnameslist[0] != 'entity':
+            print("hypernympathlist does not start with 'entity'")
+        else:
+            for htopic in topicnameslist[1:]:
+                pass
+            
+
     print(root)
     return root
     
